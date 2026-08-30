@@ -32,19 +32,27 @@ export default function SetupPage() {
     )
   }
 
-  const missing = new Set(result.missing)
+  const problems = new Map(result.rejected.map((r) => [r.name, r.problem]))
+
+  // Each problem needs a different fix, and saying which removes the guessing
+  // that "missing" alone caused.
+  const explain: Record<string, string> = {
+    absent: 'not set — the build cannot see this variable',
+    placeholder: 'still set to the example value from .env.example',
+    malformed: 'set, but not a valid URL — check for a stray quote or line break',
+  }
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-xl font-semibold">Setup needed</h1>
       <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
-        This deployment cannot reach its database. {result.missing.length} required{' '}
-        {result.missing.length === 1 ? 'variable is' : 'variables are'} missing or unusable.
+        This deployment cannot reach its database. {result.rejected.length} required{' '}
+        {result.rejected.length === 1 ? 'variable is' : 'variables are'} missing or unusable.
       </p>
 
       <ul className="mt-6 flex flex-col gap-4">
         {REQUIRED_PUBLIC_VARS.map((variable) => {
-          const isMissing = missing.has(variable.name)
+          const problem = problems.get(variable.name)
           return (
             <li
               key={variable.name}
@@ -54,16 +62,18 @@ export default function SetupPage() {
                 <code className="font-mono text-sm">{variable.name}</code>
                 <span
                   className={
-                    isMissing
+                    problem
                       ? 'text-sm text-red-600 dark:text-red-400'
                       : 'text-sm text-green-700 dark:text-green-400'
                   }
                 >
-                  {isMissing ? 'missing' : 'set'}
+                  {problem ?? 'set'}
                 </span>
               </div>
-              {isMissing && (
+              {problem && (
                 <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                  {explain[problem]}
+                  <br />
                   {variable.where}
                   <br />
                   <span className="text-xs text-neutral-500">
@@ -90,6 +100,15 @@ export default function SetupPage() {
         <p className="mt-3 text-xs text-neutral-500">
           Environment variable changes do not reach deployments that already exist. A redeploy is
           required.
+        </p>
+
+        <p className="mt-3 text-xs text-neutral-500">
+          <strong>If they are already listed in Vercel and still show as not set:</strong> values
+          prefixed <code className="font-mono">NEXT_PUBLIC_</code> are compiled into the build,
+          not read when the app runs. A variable stored as an encrypted secret reaches the server
+          at runtime but is invisible to the build. Edit each one, turn off the sensitive or
+          encrypted setting so it is stored as plain configuration, then redeploy without the
+          build cache.
         </p>
       </div>
 

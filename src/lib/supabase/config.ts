@@ -16,9 +16,17 @@ export interface SupabaseConfig {
   anonKey: string
 }
 
+/** Why a variable is unusable. "absent" and "placeholder" need different fixes. */
+export type VarProblem = 'absent' | 'placeholder' | 'malformed'
+
+export interface RejectedVar {
+  name: string
+  problem: VarProblem
+}
+
 export type ConfigResult =
   | { ok: true; config: SupabaseConfig }
-  | { ok: false; missing: string[] }
+  | { ok: false; rejected: RejectedVar[] }
 
 /** Env var names, with where each is found. Shown on the setup page. */
 export const REQUIRED_PUBLIC_VARS = [
@@ -35,40 +43,54 @@ export const REQUIRED_PUBLIC_VARS = [
 ] as const
 
 /**
- * A value that is present but unusable is as broken as a missing one, and
- * currently fails identically. Treat a placeholder or an unparseable URL as
- * absent so the setup page names it.
+ * The exact placeholder strings shipped in .env.example.
+ *
+ * Matched exactly, not as substrings. An earlier version rejected anything
+ * containing "xxxxx", which would have thrown out a legitimate Supabase URL
+ * whose random project reference happened to contain five x's — a false
+ * negative in the very code meant to end false diagnoses.
  */
-function usable(value: string | undefined): value is string {
-  if (!value) return false
+const PLACEHOLDERS = new Set([
+  'https://xxxxx.supabase.co',
+  'eyJ...',
+  'eyJhbGciOi…',
+  'your-project-url',
+  'your-anon-key',
+])
+
+function classify(value: string | undefined, expectUrl: boolean): VarProblem | null {
+  if (value === undefined) return 'absent'
+
   const trimmed = value.trim()
-  if (trimmed.length === 0) return false
-  // Values copied from a template rather than the dashboard.
-  if (trimmed.startsWith('your-') || trimmed.includes('xxxxx')) return false
-  return true
+  if (trimmed.length === 0) return 'absent'
+  if (PLACEHOLDERS.has(trimmed)) return 'placeholder'
+
+  if (expectUrl) {
+    // A trailing newline or a stray quote from pasting produces a value that
+    // is present but does not parse, failing the same opaque way as absence.
+    try {
+      new URL(trimmed)
+    } catch {
+      return 'malformed'
+    }
+  }
+
+  return null
 }
 
 export function readSupabaseConfig(): ConfigResult {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  const missing: string[] = []
+  const rejected: RejectedVar[] = []
 
-  if (!usable(url)) {
-    missing.push('NEXT_PUBLIC_SUPABASE_URL')
-  } else {
-    // A trailing newline or a stray quote from pasting produces a value that
-    // is present but does not parse, which fails the same opaque way.
-    try {
-      new URL(url.trim())
-    } catch {
-      missing.push('NEXT_PUBLIC_SUPABASE_URL')
-    }
-  }
+  const urlProblem = classify(url, true)
+  if (urlProblem) rejected.push({ name: 'NEXT_PUBLIC_SUPABASE_URL', problem: urlProblem })
 
-  if (!usable(anonKey)) missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+  const keyProblem = classify(anonKey, false)
+  if (keyProblem) rejected.push({ name: 'NEXT_PUBLIC_SUPABASE_ANON_KEY', problem: keyProblem })
 
-  if (missing.length > 0) return { ok: false, missing }
+  if (rejected.length > 0) return { ok: false, rejected }
 
   return {
     ok: true,
@@ -88,8 +110,9 @@ export function requireSupabaseConfig(): SupabaseConfig {
   const result = readSupabaseConfig()
 
   if (!result.ok) {
+    const detail = result.rejected.map((r) => `${r.name} (${r.problem})`).join(', ')
     throw new Error(
-      `Supabase is not configured. Missing or invalid: ${result.missing.join(', ')}. ` +
+      `Supabase is not configured: ${detail}. ` +
         `Set these in your hosting environment (Vercel → Settings → Environment ` +
         `Variables) or in .env.local for local development, then redeploy.`,
     )

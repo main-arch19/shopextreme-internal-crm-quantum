@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    // node --test resolves TypeScript imports by their real .ts path.
+    "allowImportingTsExtensions": true,
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
