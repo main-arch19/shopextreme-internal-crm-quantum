@@ -96,6 +96,27 @@ check('empty states tell a new user what to do', () => {
   mustContain('No locations yet', 'the empty locations page')
 })
 
+check('every document type the filter tabs offer can be created', () => {
+  // The Documents register offers Adjustment and Transfer filters. Before
+  // these screens existed those tabs filtered for records nobody could
+  // create — the UI promised a capability the app did not have.
+  mustContain('Post adjustment', 'the adjustment screen')
+  mustContain('Post transfer', 'the transfer screen')
+  mustContain('Reason (required)', 'adjustments must carry a stated reason (§10.7)')
+})
+
+check('the documents register points somewhere when empty', () => {
+  // The screen a user landed on looking for item creation. Saying only that
+  // it is empty is what sent them looking in the wrong place.
+  mustContain('read-only register', 'the empty documents state')
+  mustContain('Quick entry', 'the empty documents state should name where to go')
+})
+
+check('the overview offers a setup checklist before anything exists', () => {
+  mustContain('Getting started', 'the first-run overview')
+  mustContain('Add a location', 'the first setup step')
+})
+
 check('admin screens carry no hardcoded neutral colours', () => {
   // These were styled for a white background. On the tinted surface they
   // drift out of the palette instead of following it — which is how the
@@ -106,6 +127,8 @@ check('admin screens carry no hardcoded neutral colours', () => {
     'src/app/(app)/admin/suppliers/suppliers-admin.tsx',
     'src/app/(app)/admin/import-panel.tsx',
     'src/app/(app)/admin/layout.tsx',
+    'src/app/(app)/adjust/adjustment.tsx',
+    'src/app/(app)/transfer/transfer.tsx',
   ]
 
   const offenders = []

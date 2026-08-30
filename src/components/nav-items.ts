@@ -38,6 +38,20 @@ export const NAV_ITEMS: NavItem[] = [
     icon: 'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z',
   },
   {
+    href: '/transfer',
+    label: 'Transfer',
+    icon: 'M8 3L4 7l4 4M4 7h16M16 21l4-4-4-4M20 17H4',
+  },
+  {
+    // Manager and above: adjustment is the only document type that creates
+    // stock from nothing, which is why post_document() gates it the same way
+    // (§1.1, §10.7).
+    href: '/adjust',
+    label: 'Adjust',
+    minRole: 'manager',
+    icon: 'M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z',
+  },
+  {
     href: '/documents',
     label: 'Documents',
     icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',

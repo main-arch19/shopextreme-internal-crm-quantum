@@ -44,9 +44,33 @@ export default async function OverviewPage() {
   // is measured against the same instant and the render stays pure.
   const staleness = locations.map((location) => describeStaleness(location.last_movement_at))
 
+  // While nothing has been set up, the overview's job is to say what to do
+  // first — not to show three zeroes.
+  const needsSetup = (itemCount ?? 0) === 0 || locations.length === 0 || (docCount ?? 0) === 0
+
   return (
     <>
       <PageTitle>Overview</PageTitle>
+
+      {needsSetup && (
+        <Card className="mb-4 p-4">
+          <h2 className="text-base font-semibold text-text-primary">Getting started</h2>
+          <p className="mt-1 text-sm text-text-secondary">
+            Stock only changes through a posted document, so these come in order.
+          </p>
+          <ol className="mt-3 flex flex-col gap-2 text-sm">
+            <SetupStep done={locations.length > 0} href="/admin/locations">
+              Add a location — a warehouse, shop or van
+            </SetupStep>
+            <SetupStep done={(itemCount ?? 0) > 0} href="/admin/items">
+              Add items, or import an existing spreadsheet
+            </SetupStep>
+            <SetupStep done={(docCount ?? 0) > 0} href="/receive">
+              Record opening stock as a receipt
+            </SetupStep>
+          </ol>
+        </Card>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Stat label="Active items" value={itemCount ?? 0} />
@@ -114,6 +138,36 @@ function describeStaleness(iso: string | null): { tone: 'warning' | 'danger' | '
   if (days === 0) return { tone: 'success', text: 'today' }
   if (days === 1) return { tone: 'success', text: 'yesterday' }
   return { tone: 'success', text: `${days} days ago` }
+}
+
+function SetupStep({
+  done,
+  href,
+  children,
+}: {
+  done: boolean
+  href: string
+  children: React.ReactNode
+}) {
+  return (
+    <li className="flex items-center gap-3">
+      <span
+        aria-hidden="true"
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs ${
+          done ? 'border-success bg-success-bg text-success' : 'border-line text-text-muted'
+        }`}
+      >
+        {done ? '✓' : ''}
+      </span>
+      {done ? (
+        <span className="text-text-muted line-through">{children}</span>
+      ) : (
+        <Link href={href} className="text-text-primary underline">
+          {children}
+        </Link>
+      )}
+    </li>
+  )
 }
 
 function Stat({ label, value }: { label: string; value: number }) {

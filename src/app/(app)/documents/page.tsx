@@ -140,7 +140,42 @@ export default async function DocumentsPage({
           </Table>
         </TableWrap>
 
-        {documents.length === 0 && <EmptyState>No documents match that filter.</EmptyState>}
+        {documents.length === 0 && (
+          <EmptyState>
+            {filters.type === 'COUNT' ? (
+              <>
+                No counts recorded. Cycle counting is not built yet — until it is, use{' '}
+                <Link href="/adjust" className="underline">
+                  Adjust
+                </Link>{' '}
+                to correct stock you have counted by hand.
+              </>
+            ) : filters.type || filters.status ? (
+              'No documents match that filter.'
+            ) : (
+              // The screen someone lands on looking for "where do I add
+              // things". It has to say where, rather than that it is empty.
+              <>
+                Nothing recorded yet. This is a read-only register — documents appear here once
+                stock moves.
+                <br />
+                Record an issue or receipt in{' '}
+                <Link href="/entry" className="underline">
+                  Quick entry
+                </Link>
+                , a delivery in{' '}
+                <Link href="/receive" className="underline">
+                  Receive
+                </Link>
+                , or set up items first under{' '}
+                <Link href="/admin/items" className="underline">
+                  Catalog
+                </Link>
+                .
+              </>
+            )}
+          </EmptyState>
+        )}
       </Card>
     </>
   )
