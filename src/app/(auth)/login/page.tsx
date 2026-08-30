@@ -2,6 +2,10 @@ import { redirect } from 'next/navigation'
 import { getEmployee } from '@/lib/auth'
 import { LoginForm } from './login-form'
 
+// Reads cookies and environment per request; prerendering would bake in
+// whatever configuration existed at build time.
+export const dynamic = 'force-dynamic'
+
 export default async function LoginPage() {
   const employee = await getEmployee()
 

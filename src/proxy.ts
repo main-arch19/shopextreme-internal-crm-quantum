@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { readSupabaseConfig } from '@/lib/supabase/config'
 
 /**
  * Refreshes the Supabase session cookie on every request.
@@ -13,9 +14,19 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
 
+  // Without configuration, pass the request through untouched rather than
+  // crashing. This runs on every path the matcher covers, so throwing here
+  // returns 500 for the entire site — including /login and the setup page
+  // that would explain the problem.
+  //
+  // Skipping session refresh is harmless when Supabase is unreachable: there
+  // can be no signed-in sessions to refresh.
+  const configResult = readSupabaseConfig()
+  if (!configResult.ok) return response
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    configResult.config.url,
+    configResult.config.anonKey,
     {
       cookies: {
         getAll() {

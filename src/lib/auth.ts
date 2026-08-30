@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 export type EmployeeRole = 'pending' | 'viewer' | 'buyer' | 'manager' | 'executive'
 export type EmployeeStatus = 'pending' | 'active' | 'suspended' | 'offboarded'
@@ -30,6 +31,11 @@ export function roleAtLeast(role: EmployeeRole, min: EmployeeRole): boolean {
  * (§9.1).
  */
 export async function getEmployee(): Promise<Employee | null> {
+  // Every guarded route reaches this function, so the configuration check
+  // lives here rather than being repeated in each page. Without it,
+  // createClient() throws and the page returns an opaque 500.
+  if (!isSupabaseConfigured()) redirect('/setup')
+
   const supabase = await createClient()
 
   const {

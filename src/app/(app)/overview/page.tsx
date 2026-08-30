@@ -1,5 +1,9 @@
 import { requireActiveEmployee } from '@/lib/auth'
 
+// Reads cookies and environment per request; prerendering would bake in
+// whatever configuration existed at build time.
+export const dynamic = 'force-dynamic'
+
 /**
  * Placeholder. The real 15-second health read lands in phase 5 (§7.9), once
  * there is a ledger and snapshot history to read from.

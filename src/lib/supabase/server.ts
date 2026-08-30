@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { requireSupabaseConfig } from './config'
 
 /**
  * Per-request Supabase client carrying the caller's JWT.
@@ -13,9 +14,13 @@ import { cookies } from 'next/headers'
 export async function createClient() {
   const cookieStore = await cookies()
 
+  // Throws with the missing variable named, rather than failing inside the
+  // Supabase constructor with no indication of the cause.
+  const { url, anonKey } = requireSupabaseConfig()
+
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    anonKey,
     {
       cookies: {
         getAll() {

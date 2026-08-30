@@ -2,6 +2,10 @@ import { redirect } from 'next/navigation'
 import { getEmployee } from '@/lib/auth'
 import { SignOutButton } from './sign-out-button'
 
+// Reads cookies and environment per request; prerendering would bake in
+// whatever configuration existed at build time.
+export const dynamic = 'force-dynamic'
+
 /**
  * The only screen a non-active employee can see (§9.1).
  *
