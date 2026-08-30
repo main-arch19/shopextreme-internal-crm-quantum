@@ -12,112 +12,136 @@
  * A colour must never be defined only inside the media block, or the toggle
  * cannot override the operating system in both directions.
  *
- * Palette drawn from the supplied dashboard mockup: dark navy sidebar,
- * near-white content area, status colours carrying meaning rather than
- * decoration (§7.2).
+ * Palette: Shop Extreme JA. Near-black sidebar, brand blue for actions,
+ * the bolt's amber reserved for warning status.
+ *
+ * Brand hex values are chosen for a black background and several fail
+ * contrast on white — the car blue is 3.5:1 there, under the 4.5 text needs.
+ * Light-theme values are therefore darkened until they pass while staying
+ * recognisably the same colour; dark-theme values use the brand hex directly,
+ * where they measure 4.9-8.4:1.
+ *
+ * Amber is deliberately NOT the action colour. §7.2 gives it a meaning on the
+ * reorder queue — "under seven days spare", between red for late and green
+ * for fine. If amber also meant "press this", that status language would stop
+ * reading as status.
  */
 
 :root {
   /* Surfaces */
-  --surface-page: #f4f7fa;
+  --surface-page: #f5f7f9;
   --surface-card: #ffffff;
   --surface-raised: #ffffff;
-  --surface-subtle: #eef2f7;
+  --surface-subtle: #eceff3;
 
-  /* Sidebar — the same dark navy in both themes. It is the app's anchor;
-     flipping it between themes makes the product feel like two products. */
-  --sidebar-bg: #2c4759;
-  --sidebar-fg: #e8eef3;
-  --sidebar-fg-muted: #9fb3c1;
-  --sidebar-active-bg: #3d5a6d;
+  /* Sidebar — the logo's near-black, identical in both themes. It is the
+     app's anchor and the ground the logo was drawn for; flipping it between
+     themes makes the product feel like two products. */
+  --sidebar-bg: #121212;
+  --sidebar-fg: #e9edf1;
+  --sidebar-fg-muted: #9aa4ad;
+  --sidebar-active-bg: #1f2a33;
   --sidebar-active-fg: #ffffff;
 
   /* Text */
-  --text-primary: #1b2b36;
-  --text-secondary: #4a5f6d;
-  --text-muted: #5f7382;
+  --text-primary: #16202a;
+  --text-secondary: #475764;
+  --text-muted: #5e6e7b;
 
   /* Lines */
-  --border: #d8e1e8;
-  --border-strong: #b9c8d3;
+  --border: #d9dfe5;
+  --border-strong: #b6c0c9;
 
-  /* Interactive */
-  --accent: #2c4759;
+  /* Interactive — the car's blue, darkened from #2b8fd6 (3.5:1 on white)
+     to 5.41:1 while staying the same hue. */
+  --accent: #1a6fa8;
   --accent-fg: #ffffff;
-  --focus-ring: #2563eb;
+  --focus-ring: #1f7ab8;
 
   /* Status. Meaning, not decoration — red is "already late", amber is
      "under seven days spare", green is "fine" (§7.2). */
   --danger: #c0392b;
   --danger-bg: #fdecea;
-  --warning: #8a5310;
-  --warning-bg: #fdf3e3;
+  --warning: #8a5510;
+  --warning-bg: #fdf2e0;
   --success: #1d7a4a;
   --success-bg: #e9f6ef;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --surface-page: #131a20;
-    --surface-card: #1a242c;
-    --surface-raised: #212d36;
-    --surface-subtle: #202b34;
+    --surface-page: #0e1216;
+    --surface-card: #161d24;
+    --surface-raised: #1d252d;
+    --surface-subtle: #1c242b;
 
-    --sidebar-bg: #16202a;
-    --sidebar-fg: #e2eaf0;
-    --sidebar-fg-muted: #8fa3b2;
-    --sidebar-active-bg: #2c4759;
+    --sidebar-bg: #0a0a0a;
+    --sidebar-fg: #e9edf1;
+    --sidebar-fg-muted: #8d979f;
+    --sidebar-active-bg: #1f2a33;
     --sidebar-active-fg: #ffffff;
 
-    --text-primary: #e8eef3;
-    --text-secondary: #b3c3ce;
-    --text-muted: #8598a5;
+    --text-primary: #e9eef2;
+    --text-secondary: #b0bfc9;
+    --text-muted: #8494a0;
 
-    --border: #2c3a45;
-    --border-strong: #3d4f5c;
+    --border: #29333c;
+    --border-strong: #3a4753;
 
-    --accent: #4a7a99;
-    --accent-fg: #ffffff;
-    --focus-ring: #60a5fa;
+    /* The brand blue unmodified — 4.86:1 against the dark card. Its
+       foreground is near-black, not white: white on this blue is 3.5:1,
+       and darkening the blue enough to carry white would drop the button
+       itself to 3.67:1 against the card. Dark text gives 5.66:1 and keeps
+       the brand hue exact. */
+    --accent: #2b8fd6;
+    --accent-fg: #0a0a0a;
+    --focus-ring: #5bb8e8;
 
     /* Lightened so they stay legible on dark surfaces. The unmodified light
        values fail contrast here, and these carry meaning. */
     --danger: #f08a80;
     --danger-bg: #3a1f1c;
-    --warning: #e0a95c;
-    --warning-bg: #33270f;
+    --warning: #f5a623;
+    --warning-bg: #2f2409;
     --success: #6cc79a;
     --success-bg: #14301f;
   }
 }
 
 :root[data-theme="dark"] {
-  --surface-page: #131a20;
-  --surface-card: #1a242c;
-  --surface-raised: #212d36;
-  --surface-subtle: #202b34;
+  --surface-page: #0e1216;
+  --surface-card: #161d24;
+  --surface-raised: #1d252d;
+  --surface-subtle: #1c242b;
 
-  --sidebar-bg: #16202a;
-  --sidebar-fg: #e2eaf0;
-  --sidebar-fg-muted: #8fa3b2;
-  --sidebar-active-bg: #2c4759;
+  --sidebar-bg: #0a0a0a;
+  --sidebar-fg: #e9edf1;
+  --sidebar-fg-muted: #8d979f;
+  --sidebar-active-bg: #1f2a33;
   --sidebar-active-fg: #ffffff;
 
-  --text-primary: #e8eef3;
-  --text-secondary: #b3c3ce;
-  --text-muted: #8598a5;
+  --text-primary: #e9eef2;
+  --text-secondary: #b0bfc9;
+  --text-muted: #8494a0;
 
-  --border: #2c3a45;
-  --border-strong: #3d4f5c;
+  --border: #29333c;
+  --border-strong: #3a4753;
 
-  --accent: #4a7a99;
-  --accent-fg: #ffffff;
-  --focus-ring: #60a5fa;
+  /* The brand blue unmodified — 4.86:1 against the dark card. Its
+     foreground is near-black, not white: white on this blue is 3.5:1,
+     and darkening the blue enough to carry white would drop the button
+     itself to 3.67:1 against the card. Dark text gives 5.66:1 and keeps
+     the brand hue exact. */
+  --accent: #2b8fd6;
+  --accent-fg: #0a0a0a;
+  --focus-ring: #5bb8e8;
 
+  /* Lightened so they stay legible on dark surfaces. The unmodified light
+     values fail contrast here, and these carry meaning. */
   --danger: #f08a80;
   --danger-bg: #3a1f1c;
-  --warning: #e0a95c;
-  --warning-bg: #33270f;
+  --warning: #f5a623;
+  --warning-bg: #2f2409;
   --success: #6cc79a;
   --success-bg: #14301f;
 }
