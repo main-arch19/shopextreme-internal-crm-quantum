@@ -1,38 +1,28 @@
-import Link from 'next/link'
 import { requireActiveEmployee } from '@/lib/auth'
+import { Sidebar } from '@/components/sidebar'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const employee = await requireActiveEmployee()
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-neutral-200 dark:border-neutral-800">
-        <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-4 px-4 py-3 text-sm">
-          <Link href="/overview" className="font-semibold">
-            Inventory
-          </Link>
-          <Link href="/entry" className="text-neutral-600 hover:underline dark:text-neutral-400">
-            Entry
-          </Link>
-          <Link href="/receive" className="text-neutral-600 hover:underline dark:text-neutral-400">
-            Receive
-          </Link>
-          <Link href="/documents" className="text-neutral-600 hover:underline dark:text-neutral-400">
-            Documents
-          </Link>
-          {/* Managers and above only — RLS blocks the data regardless, but a
-              link to a page that redirects is just noise for a buyer. */}
-          {(employee.role === 'manager' || employee.role === 'executive') && (
-            <Link href="/admin/items" className="text-neutral-600 hover:underline dark:text-neutral-400">
-              Catalog
-            </Link>
-          )}
-          <span className="ml-auto text-xs text-neutral-500">
-            {employee.full_name ?? employee.email} · {employee.role}
-          </span>
-        </nav>
-      </header>
-      {children}
+    <div className="min-h-screen bg-surface-page">
+      <Sidebar employee={employee} />
+
+      {/* Offset for the fixed sidebar on desktop; full width below md, where
+          the sidebar becomes a slide-over. */}
+      <div className="md:pl-64">
+        <header className="flex h-14 items-center justify-end gap-3 border-b border-line bg-surface-card px-4">
+          {/* No search box and no notification bell, both of which the mockup
+              shows. Search is not in the spec and item detail (§7.3) is not
+              built, so there is nowhere for a result to land. Nothing
+              generates notifications until §11 alerting in phase 9, and a
+              bell that never rings misrepresents the system's state. */}
+          <ThemeToggle />
+        </header>
+
+        <main className="px-4 py-6 md:px-6">{children}</main>
+      </div>
     </div>
   )
 }

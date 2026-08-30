@@ -3,6 +3,17 @@ import { requireActiveEmployee } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import type { DocStatus, DocType } from '@/lib/posting/types'
 import { VoidButton } from './void-button'
+import {
+  Card,
+  EmptyState,
+  PageTitle,
+  StatusBadge,
+  Table,
+  TableWrap,
+  Td,
+  Th,
+  Tr,
+} from '@/components/ui'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,10 +69,10 @@ export default async function DocumentsPage({
   const canVoid = employee.role === 'manager' || employee.role === 'executive'
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6">
-      <h1 className="text-lg font-semibold">Documents</h1>
+    <>
+      <PageTitle>Documents</PageTitle>
 
-      <div className="mt-3 flex flex-wrap gap-2 text-sm">
+      <div className="mb-4 flex flex-wrap gap-2 text-sm">
         <FilterLink label="All" href="/documents" active={!filters.type && !filters.status} />
         {(['RECEIPT', 'ISSUE', 'ADJUSTMENT', 'TRANSFER', 'COUNT'] as DocType[]).map((t) => (
           <FilterLink
@@ -78,66 +89,60 @@ export default async function DocumentsPage({
         />
       </div>
 
-      {/* Dense bordered rows, not cards — this is a scanning surface (§7.2). */}
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-neutral-300 text-left dark:border-neutral-700">
-              <th className="py-2 pr-3 font-medium">Number</th>
-              <th className="py-2 pr-3 font-medium">Type</th>
-              <th className="py-2 pr-3 font-medium">When</th>
-              <th className="py-2 pr-3 font-medium">Location</th>
-              <th className="py-2 pr-3 font-medium">Posted by</th>
-              <th className="py-2 pr-3 font-medium">Note</th>
-              <th className="py-2 font-medium"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {documents.map((doc) => (
-              <tr
-                key={doc.id}
-                className="border-b border-neutral-200 last:border-0 dark:border-neutral-800"
-              >
-                <td className="py-2 pr-3 font-mono">
-                  {doc.doc_number}
-                  {doc.voids_document && (
-                    <span className="ml-1 text-xs text-neutral-500">(reversal)</span>
-                  )}
-                </td>
-                <td className="py-2 pr-3">
-                  {doc.doc_type.charAt(0) + doc.doc_type.slice(1).toLowerCase()}
-                </td>
-                <td className="py-2 pr-3 tabular-nums text-neutral-600 dark:text-neutral-400">
-                  {new Date(doc.occurred_at).toLocaleString()}
-                </td>
-                <td className="py-2 pr-3">{doc.locations?.code ?? '—'}</td>
-                <td className="py-2 pr-3 text-neutral-600 dark:text-neutral-400">
-                  {doc.employees?.full_name ?? doc.employees?.email ?? '—'}
-                </td>
-                <td className="py-2 pr-3 text-neutral-600 dark:text-neutral-400">
-                  {doc.status === 'VOIDED' ? (
-                    <span className="text-red-600 dark:text-red-400">
-                      Voided — {doc.void_reason}
-                    </span>
-                  ) : (
-                    (doc.reason ?? doc.reference ?? '')
-                  )}
-                </td>
-                <td className="py-2 text-right">
-                  {canVoid && doc.status === 'POSTED' && (
-                    <VoidButton documentId={doc.id} docNumber={doc.doc_number} />
-                  )}
-                </td>
+      {/* Card wraps the table; the rows inside stay dense. §7.2 — a buyer
+          scans this daily and needs rows per screen, not padding. */}
+      <Card>
+        <TableWrap>
+          <Table>
+            <thead>
+              <tr>
+                <Th>Number</Th>
+                <Th>Type</Th>
+                <Th>When</Th>
+                <Th>Location</Th>
+                <Th>Posted by</Th>
+                <Th>Note</Th>
+                <Th align="right"> </Th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {documents.map((doc) => (
+                <Tr key={doc.id}>
+                  <Td className="font-mono whitespace-nowrap">
+                    {doc.doc_number}
+                    {doc.voids_document && (
+                      <span className="ml-1 text-xs text-text-muted">(reversal)</span>
+                    )}
+                  </Td>
+                  <Td>{doc.doc_type.charAt(0) + doc.doc_type.slice(1).toLowerCase()}</Td>
+                  <Td className="whitespace-nowrap tabular-nums text-text-secondary">
+                    {new Date(doc.occurred_at).toLocaleString()}
+                  </Td>
+                  <Td>{doc.locations?.code ?? '—'}</Td>
+                  <Td className="text-text-secondary">
+                    {doc.employees?.full_name ?? doc.employees?.email ?? '—'}
+                  </Td>
+                  <Td className="text-text-secondary">
+                    {doc.status === 'VOIDED' ? (
+                      <StatusBadge tone="danger">Voided — {doc.void_reason}</StatusBadge>
+                    ) : (
+                      (doc.reason ?? doc.reference ?? '')
+                    )}
+                  </Td>
+                  <Td align="right">
+                    {canVoid && doc.status === 'POSTED' && (
+                      <VoidButton documentId={doc.id} docNumber={doc.doc_number} />
+                    )}
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
+        </TableWrap>
 
-        {documents.length === 0 && (
-          <p className="py-6 text-sm text-neutral-500">No documents match that filter.</p>
-        )}
-      </div>
-    </main>
+        {documents.length === 0 && <EmptyState>No documents match that filter.</EmptyState>}
+      </Card>
+    </>
   )
 }
 
@@ -153,10 +158,10 @@ function FilterLink({
   return (
     <Link
       href={href}
-      className={`rounded border px-2 py-1 ${
+      className={`rounded-lg border px-3 py-1.5 transition-colors ${
         active
-          ? 'border-neutral-900 bg-neutral-900 text-white dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900'
-          : 'border-neutral-300 dark:border-neutral-700'
+          ? 'border-accent bg-accent text-accent-fg'
+          : 'border-line text-text-secondary hover:bg-surface-subtle'
       }`}
     >
       {label}

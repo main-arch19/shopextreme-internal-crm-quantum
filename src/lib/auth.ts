@@ -1,25 +1,16 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
+import { roleAtLeast, type Employee, type EmployeeRole } from '@/lib/roles'
 
-export type EmployeeRole = 'pending' | 'viewer' | 'buyer' | 'manager' | 'executive'
-export type EmployeeStatus = 'pending' | 'active' | 'suspended' | 'offboarded'
+// Re-exported so callers can keep importing these from auth.ts. The
+// definitions live in roles.ts because this module imports next/headers,
+// which is unavailable to client components.
+export { roleAtLeast } from '@/lib/roles'
+export type { Employee, EmployeeRole, EmployeeStatus } from '@/lib/roles'
 
-export interface Employee {
-  id: string
-  email: string
-  full_name: string | null
-  role: EmployeeRole
-  status: EmployeeStatus
-  last_active_at: string | null
-}
 
-/** Declaration order matters — it mirrors the Postgres enum, which compares ordinally. */
-const ROLE_ORDER: EmployeeRole[] = ['pending', 'viewer', 'buyer', 'manager', 'executive']
 
-export function roleAtLeast(role: EmployeeRole, min: EmployeeRole): boolean {
-  return ROLE_ORDER.indexOf(role) >= ROLE_ORDER.indexOf(min)
-}
 
 /**
  * Returns the signed-in employee, or null.

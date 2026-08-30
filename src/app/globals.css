@@ -1,26 +1,179 @@
 @import "tailwindcss";
 
+/**
+ * Design tokens.
+ *
+ * Defined three times on purpose:
+ *   :root                                    light, the base
+ *   @media (prefers-color-scheme: dark)      OS preference, guarded so an
+ *     :root:not([data-theme="light"])        explicit light choice still wins
+ *   :root[data-theme="dark"]                 explicit dark choice
+ *
+ * A colour must never be defined only inside the media block, or the toggle
+ * cannot override the operating system in both directions.
+ *
+ * Palette drawn from the supplied dashboard mockup: dark navy sidebar,
+ * near-white content area, status colours carrying meaning rather than
+ * decoration (§7.2).
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces */
+  --surface-page: #f4f7fa;
+  --surface-card: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-subtle: #eef2f7;
+
+  /* Sidebar — the same dark navy in both themes. It is the app's anchor;
+     flipping it between themes makes the product feel like two products. */
+  --sidebar-bg: #2c4759;
+  --sidebar-fg: #e8eef3;
+  --sidebar-fg-muted: #9fb3c1;
+  --sidebar-active-bg: #3d5a6d;
+  --sidebar-active-fg: #ffffff;
+
+  /* Text */
+  --text-primary: #1b2b36;
+  --text-secondary: #4a5f6d;
+  --text-muted: #5f7382;
+
+  /* Lines */
+  --border: #d8e1e8;
+  --border-strong: #b9c8d3;
+
+  /* Interactive */
+  --accent: #2c4759;
+  --accent-fg: #ffffff;
+  --focus-ring: #2563eb;
+
+  /* Status. Meaning, not decoration — red is "already late", amber is
+     "under seven days spare", green is "fine" (§7.2). */
+  --danger: #c0392b;
+  --danger-bg: #fdecea;
+  --warning: #8a5310;
+  --warning-bg: #fdf3e3;
+  --success: #1d7a4a;
+  --success-bg: #e9f6ef;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface-page: #131a20;
+    --surface-card: #1a242c;
+    --surface-raised: #212d36;
+    --surface-subtle: #202b34;
+
+    --sidebar-bg: #16202a;
+    --sidebar-fg: #e2eaf0;
+    --sidebar-fg-muted: #8fa3b2;
+    --sidebar-active-bg: #2c4759;
+    --sidebar-active-fg: #ffffff;
+
+    --text-primary: #e8eef3;
+    --text-secondary: #b3c3ce;
+    --text-muted: #8598a5;
+
+    --border: #2c3a45;
+    --border-strong: #3d4f5c;
+
+    --accent: #4a7a99;
+    --accent-fg: #ffffff;
+    --focus-ring: #60a5fa;
+
+    /* Lightened so they stay legible on dark surfaces. The unmodified light
+       values fail contrast here, and these carry meaning. */
+    --danger: #f08a80;
+    --danger-bg: #3a1f1c;
+    --warning: #e0a95c;
+    --warning-bg: #33270f;
+    --success: #6cc79a;
+    --success-bg: #14301f;
+  }
+}
+
+:root[data-theme="dark"] {
+  --surface-page: #131a20;
+  --surface-card: #1a242c;
+  --surface-raised: #212d36;
+  --surface-subtle: #202b34;
+
+  --sidebar-bg: #16202a;
+  --sidebar-fg: #e2eaf0;
+  --sidebar-fg-muted: #8fa3b2;
+  --sidebar-active-bg: #2c4759;
+  --sidebar-active-fg: #ffffff;
+
+  --text-primary: #e8eef3;
+  --text-secondary: #b3c3ce;
+  --text-muted: #8598a5;
+
+  --border: #2c3a45;
+  --border-strong: #3d4f5c;
+
+  --accent: #4a7a99;
+  --accent-fg: #ffffff;
+  --focus-ring: #60a5fa;
+
+  --danger: #f08a80;
+  --danger-bg: #3a1f1c;
+  --warning: #e0a95c;
+  --warning-bg: #33270f;
+  --success: #6cc79a;
+  --success-bg: #14301f;
+}
+
+/* Expose tokens to Tailwind so `bg-surface-card` and `text-muted` work. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-surface-page: var(--surface-page);
+  --color-surface-card: var(--surface-card);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-subtle: var(--surface-subtle);
+
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-fg-muted: var(--sidebar-fg-muted);
+  --color-sidebar-active-bg: var(--sidebar-active-bg);
+  --color-sidebar-active-fg: var(--sidebar-active-fg);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Visible focus everywhere. The entry screens are keyboard-first (§7.1) and
+   an invisible focus ring makes the no-mouse flow unusable. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
