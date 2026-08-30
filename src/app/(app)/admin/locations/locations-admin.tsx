@@ -4,22 +4,29 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { setLocationActive, upsertLocation } from '../actions'
 import { LOCATION_TYPES, type Location, type LocationType } from '@/lib/catalog/types'
+import {
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  PageTitle,
+  Table,
+  TableWrap,
+  Td,
+  Th,
+  Tr,
+  fieldClass,
+} from '@/components/ui'
 
 export function LocationsAdmin({ locations }: { locations: Location[] }) {
   const router = useRouter()
   const [editing, setEditing] = useState<Location | 'new' | null>(null)
 
   return (
-    <main>
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Locations</h1>
-        <button
-          onClick={() => setEditing('new')}
-          className="rounded bg-neutral-900 px-3 py-1.5 text-sm text-white dark:bg-neutral-100 dark:text-neutral-900"
-        >
-          New location
-        </button>
-      </div>
+    <>
+      <PageTitle actions={<Button onClick={() => setEditing('new')}>New location</Button>}>
+        Locations
+      </PageTitle>
 
       {editing && (
         <LocationForm
@@ -31,56 +38,53 @@ export function LocationsAdmin({ locations }: { locations: Location[] }) {
         />
       )}
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-neutral-300 text-left dark:border-neutral-700">
-              <th className="py-2 pr-3 font-medium">Code</th>
-              <th className="py-2 pr-3 font-medium">Name</th>
-              <th className="py-2 pr-3 font-medium">Type</th>
-              <th className="py-2 font-medium"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {locations.map((location) => (
-              <tr
-                key={location.id}
-                className={`border-b border-neutral-200 last:border-0 dark:border-neutral-800 ${
-                  location.is_active ? '' : 'text-neutral-400'
-                }`}
-              >
-                <td className="py-2 pr-3 font-mono">{location.code}</td>
-                <td className="py-2 pr-3">{location.name}</td>
-                <td className="py-2 pr-3">{location.type}</td>
-                <td className="py-2 text-right">
-                  <button
-                    onClick={() => setEditing(location)}
-                    className="mr-3 text-xs text-neutral-500 underline"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={async () => {
-                      await setLocationActive(location.id, !location.is_active)
-                      router.refresh()
-                    }}
-                    className="text-xs text-neutral-500 underline"
-                  >
-                    {location.is_active ? 'Deactivate' : 'Reactivate'}
-                  </button>
-                </td>
+      <Card>
+        <TableWrap>
+          <Table>
+            <thead>
+              <tr>
+                <Th>Code</Th>
+                <Th>Name</Th>
+                <Th>Type</Th>
+                <Th align="right"> </Th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {locations.map((location) => (
+                <Tr key={location.id} muted={!location.is_active}>
+                  <Td className="font-mono">{location.code}</Td>
+                  <Td>{location.name}</Td>
+                  <Td>{location.type}</Td>
+                  <Td align="right">
+                    <span className="flex justify-end gap-3">
+                      <Button variant="ghost" onClick={() => setEditing(location)}>
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={async () => {
+                          await setLocationActive(location.id, !location.is_active)
+                          router.refresh()
+                        }}
+                      >
+                        {location.is_active ? 'Deactivate' : 'Reactivate'}
+                      </Button>
+                    </span>
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
+        </TableWrap>
 
         {locations.length === 0 && (
-          <p className="py-6 text-sm text-neutral-500">
-            No locations yet. At least one is needed before stock can move.
-          </p>
+          <EmptyState>
+            No locations yet. Stock cannot move until at least one exists — use{' '}
+            <strong>New location</strong> above.
+          </EmptyState>
         )}
-      </div>
-    </main>
+      </Card>
+    </>
   )
 }
 
@@ -120,66 +124,58 @@ function LocationForm({
   }
 
   return (
-    <form
-      onSubmit={submit}
-      className="mt-4 rounded border border-neutral-300 p-4 dark:border-neutral-700"
-    >
-      <div className="grid gap-3 sm:grid-cols-3">
-        <label className="flex flex-col gap-1 text-sm">
-          Code
-          <input
-            required
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="WH1"
-            className="rounded border border-neutral-300 px-2 py-1.5 font-mono uppercase dark:border-neutral-700 dark:bg-neutral-900"
-          />
-        </label>
+    <Card className="mb-4 p-4">
+      <form onSubmit={submit}>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Field label="Code">
+            <input
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="WH1"
+              className={`${fieldClass} font-mono uppercase`}
+            />
+          </Field>
 
-        <label className="flex flex-col gap-1 text-sm">
-          Name
-          <input
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="rounded border border-neutral-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
-          />
-        </label>
+          <Field label="Name">
+            <input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={fieldClass}
+            />
+          </Field>
 
-        <label className="flex flex-col gap-1 text-sm">
-          Type
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as LocationType)}
-            className="rounded border border-neutral-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
-          >
-            {LOCATION_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+          <Field label="Type">
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as LocationType)}
+              className={fieldClass}
+            >
+              {LOCATION_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
 
-      {error && (
-        <p role="alert" className="mt-3 text-sm text-red-600">
-          {error}
-        </p>
-      )}
+        {error && (
+          <p role="alert" className="mt-3 text-sm text-danger">
+            {error}
+          </p>
+        )}
 
-      <div className="mt-4 flex gap-2">
-        <button
-          type="submit"
-          disabled={busy}
-          className="rounded bg-neutral-900 px-3 py-1.5 text-sm text-white disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900"
-        >
-          {busy ? 'Saving…' : 'Save'}
-        </button>
-        <button type="button" onClick={onDone} className="text-sm text-neutral-500 underline">
-          Cancel
-        </button>
-      </div>
-    </form>
+        <div className="mt-4 flex items-center gap-3">
+          <Button type="submit" disabled={busy}>
+            {busy ? 'Saving…' : 'Save'}
+          </Button>
+          <Button type="button" variant="ghost" onClick={onDone}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Card>
   )
 }

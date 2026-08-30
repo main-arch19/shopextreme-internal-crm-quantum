@@ -12,7 +12,8 @@
     "verify:phase0": "node scripts/verify-phase0.mjs",
     "verify:phase2": "node scripts/verify-phase2.mjs",
     "verify:barcode": "node scripts/verify-barcode.mjs",
-    "test": "node --test \"src/**/*.test.ts\""
+    "test": "node --test \"src/**/*.test.ts\"",
+    "verify:layout": "node scripts/verify-layout.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
