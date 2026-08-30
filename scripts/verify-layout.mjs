@@ -105,11 +105,21 @@ check('every document type the filter tabs offer can be created', () => {
   mustContain('Reason (required)', 'adjustments must carry a stated reason (§10.7)')
 })
 
+check('the documents register offers a create action', () => {
+  // Asked for twice. The register is read-only by design (§7.6), but that is
+  // an argument about what the button does, not whether one exists.
+  mustContain('New document', 'the create action on the register')
+  mustContain('Goods arrived from a supplier', 'each type says when to use it')
+  mustContain('Correct a miscount', 'adjustment needs explaining most')
+})
+
 check('the documents register points somewhere when empty', () => {
   // The screen a user landed on looking for item creation. Saying only that
-  // it is empty is what sent them looking in the wrong place.
-  mustContain('read-only register', 'the empty documents state')
-  mustContain('Quick entry', 'the empty documents state should name where to go')
+  // it is empty is what sent them looking in the wrong place. Now that the
+  // create action is on the page, the empty state points at it rather than
+  // sending someone to another screen.
+  mustContain('Documents appear here once stock moves', 'the empty documents state')
+  mustContain('use', 'the empty state should direct to New document')
 })
 
 check('the overview offers a setup checklist before anything exists', () => {
@@ -129,6 +139,7 @@ check('admin screens carry no hardcoded neutral colours', () => {
     'src/app/(app)/admin/layout.tsx',
     'src/app/(app)/adjust/adjustment.tsx',
     'src/app/(app)/transfer/transfer.tsx',
+    'src/app/(app)/documents/new-document-menu.tsx',
   ]
 
   const offenders = []

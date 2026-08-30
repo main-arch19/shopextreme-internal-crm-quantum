@@ -3,6 +3,7 @@ import { requireActiveEmployee } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import type { DocStatus, DocType } from '@/lib/posting/types'
 import { VoidButton } from './void-button'
+import { NewDocumentMenu } from './new-document-menu'
 import {
   Card,
   EmptyState,
@@ -70,7 +71,7 @@ export default async function DocumentsPage({
 
   return (
     <>
-      <PageTitle>Documents</PageTitle>
+      <PageTitle actions={<NewDocumentMenu role={employee.role} />}>Documents</PageTitle>
 
       <div className="mb-4 flex flex-wrap gap-2 text-sm">
         <FilterLink label="All" href="/documents" active={!filters.type && !filters.status} />
@@ -156,18 +157,10 @@ export default async function DocumentsPage({
               // The screen someone lands on looking for "where do I add
               // things". It has to say where, rather than that it is empty.
               <>
-                Nothing recorded yet. This is a read-only register — documents appear here once
-                stock moves.
+                Nothing recorded yet. Documents appear here once stock moves — use{' '}
+                <strong>New document</strong> above to record one.
                 <br />
-                Record an issue or receipt in{' '}
-                <Link href="/entry" className="underline">
-                  Quick entry
-                </Link>
-                , a delivery in{' '}
-                <Link href="/receive" className="underline">
-                  Receive
-                </Link>
-                , or set up items first under{' '}
+                If you have no items yet, start under{' '}
                 <Link href="/admin/items" className="underline">
                   Catalog
                 </Link>

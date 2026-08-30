@@ -158,7 +158,13 @@ export function Button({
   variant = 'primary',
   className = '',
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: ButtonVariant
+  // React 19 passes ref as an ordinary prop, so it forwards through ...props
+  // without forwardRef. Declared so callers that need to restore focus — a
+  // menu returning focus to its trigger — can reach the element.
+  ref?: React.Ref<HTMLButtonElement>
+}) {
   const base =
     variant === 'ghost' || variant === 'danger'
       ? 'text-sm disabled:opacity-50'
